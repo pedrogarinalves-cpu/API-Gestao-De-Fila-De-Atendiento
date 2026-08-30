@@ -5,14 +5,14 @@ import java.util.Objects;
 
 public class Cliente {
 
-    private Long id;
-    private String nome;
-    private LocalDateTime horarioChegada;
+    private final Long id;
+    private final String nome;
+    private final LocalDateTime horarioChegada;
 
-    public Cliente(Long id, String nome, LocalDateTime hoarioChegada) {
+    public Cliente(Long id, String nome, LocalDateTime horarioChegada) {
         this.id = id;
         this.nome = nome;
-        this.horarioChegada = hoarioChegada;
+        this.horarioChegada = horarioChegada;
     }
 
     public Long getId() {
