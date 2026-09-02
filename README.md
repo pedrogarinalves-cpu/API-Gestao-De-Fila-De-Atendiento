@@ -4,7 +4,7 @@ API para gerenciamento de filas de atendimento, desenvolvida em Java com Spring 
 
 ## Status do projeto
 
-**v1 — em desenvolvimento.** A camada de domínio (Java puro) está completa. A camada de API (REST) e a persistência ainda estão em construção.
+**v1 — em desenvolvimento.** A camada de domínio (Java puro) está completa e validada por testes manuais. A camada de API (REST) e a persistência ainda estão em construção.
 
 ## Sobre o projeto
 
@@ -37,6 +37,18 @@ com.gestaodeatendimento
 - Encapsulamento de transições de estado dentro da própria entidade `Atendimento`, evitando setters genéricos que permitiriam estados inválidos.
 - `equals`/`hashCode` de entidades baseados apenas no identificador único (`id` ou `numeroSenha`), já que representam identidade, não valor.
 
+## Testes do domínio (Java puro)
+
+Antes de integrar com Spring, toda a lógica de negócio do `FilaService` foi validada isoladamente através de uma classe de teste manual (`TesteFilaManual`), executada via `main()` independente do framework. O teste cobriu:
+
+- Entrada de múltiplos clientes na fila e geração sequencial de senhas
+- Ordem de atendimento respeitando FIFO (primeiro a entrar, primeiro a ser chamado)
+- Transições de estado (`AGUARDANDO` → `EM_ATENDIMENTO` → `FINALIZADO`/`CANCELADO`)
+- Atualização correta da fila após cada operação
+- Lançamento correto das exceções de domínio (`AtendimentoNaoEncontradoException` para senha inexistente, `FilaVaziaException` para fila vazia)
+
+Todos os cenários testados retornaram o comportamento esperado, sem erros em tempo de execução.
+
 ## Tecnologias
 
 - Java
@@ -51,6 +63,10 @@ com.gestaodeatendimento
 - [ ] Testes automatizados (JUnit)
 - [ ] Autenticação/autorização
 
+## Visão futura (fora do escopo da v1)
+
+Uma ideia em estudo para uma versão futura, bem mais adiante da v1 atual, é adaptar o conceito de fila para o contexto da área da saúde — por exemplo, ordenar o atendimento por **gravidade/prioridade clínica** em vez de estritamente FIFO (semelhante a um sistema de triagem hospitalar). Essa é apenas a idealização final do projeto a longo prazo e não faz parte do escopo atual nem da v1.
+
 ## Como rodar
 
 ```bash
@@ -58,4 +74,3 @@ com.gestaodeatendimento
 ```
 
 > Observação: a camada de API e a persistência ainda estão em desenvolvimento; por enquanto, a lógica de domínio pode ser validada isoladamente via testes manuais em Java puro.
-
