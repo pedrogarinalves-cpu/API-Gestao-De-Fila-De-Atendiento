@@ -13,12 +13,13 @@ public class FilaService {
      private GeradorDeSenha geradorDeSenha;
      private Map<Long, Atendimento> atendimentoEmAndamento;
 
-    public FilaService(Queue<Atendimento> fila, GeradorDeSenha geradorDeSenha, Map<Long, Atendimento> atendimentoEmAndamento) {
-        this.fila = fila;
-        this.geradorDeSenha = geradorDeSenha;
-        this.atendimentoEmAndamento = atendimentoEmAndamento;
+    public FilaService() {
+        this.fila = new LinkedList<>();
+        this.geradorDeSenha =  new GeradorDeSenha();
+        this.atendimentoEmAndamento = new HashMap<>();
     }
-    public Atendimento entarNaFila(Cliente cliente){
+
+    public Atendimento entrarNaFila(Cliente cliente){
         Long numeroSenha = geradorDeSenha.proximaSenha();
 
          Atendimento atendimento = new Atendimento( numeroSenha,  cliente );
