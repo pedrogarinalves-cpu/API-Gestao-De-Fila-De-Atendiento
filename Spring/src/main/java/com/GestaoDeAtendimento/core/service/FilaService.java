@@ -4,8 +4,10 @@ import com.GestaoDeAtendimento.core.exception.AtendimentoNaoEncontradoException;
 import com.GestaoDeAtendimento.core.exception.FilaVaziaException;
 import com.GestaoDeAtendimento.core.model.Atendimento;
 import com.GestaoDeAtendimento.core.model.Cliente;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
+@Service
 
 public class FilaService {
 
