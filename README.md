@@ -4,7 +4,7 @@ API para gerenciamento de filas de atendimento, desenvolvida em Java com Spring 
 
 ## Status do projeto
 
-**v1 — em desenvolvimento.** A camada de domínio (Java puro) está completa e validada por testes manuais. A camada de API (REST) e a persistência ainda estão em construção.
+**v1 — em desenvolvimento.** A camada de domínio (Java puro) está completa e validada por testes manuais. A camada de API (REST) já está implementada e a aplicação sobe com sucesso. Os endpoints ainda serão testados via Postman. Persistência ainda não implementada.
 
 ## Sobre o projeto
 
@@ -18,7 +18,9 @@ com.gestaodeatendimento
 │   ├── model/          → Entidades de domínio (Cliente, Atendimento, StatusAtendimento)
 │   ├── service/         → Lógica de negócio (FilaService, GeradorDeSenha)
 │   └── exception/       → Exceções de domínio customizadas
-└── api/                  → Camada de aplicação (controllers, DTOs, configuração) — em construção
+└── api/
+    ├── dto/             → Objetos de entrada/saída da API (EntrarNaFilaRequest, AtendimentoResponse, PosicaoResponse)
+    └── controller/       → FilaController, expondo a lógica de negócio via endpoints REST
 ```
 
 ## Domínio
@@ -26,9 +28,24 @@ com.gestaodeatendimento
 - **Cliente**: representa a pessoa que entra na fila (id, nome, horário de chegada). Classe imutável.
 - **Atendimento**: representa o "ticket" de um cliente na fila, com número de senha, status e horários de entrada/início/fim. Expõe métodos de transição de estado (`iniciarAtendimento`, `finalizar`, `cancelar`) em vez de setters genéricos.
 - **StatusAtendimento**: enum com os estados possíveis (`AGUARDANDO`, `EM_ATENDIMENTO`, `FINALIZADO`, `CANCELADO`).
-- **FilaService**: orquestra toda a lógica de negócio — entrar na fila, chamar o próximo, finalizar, cancelar, consultar posição e listar a fila atual.
+- **FilaService**: orquestra toda a lógica de negócio — entrar na fila, chamar o próximo, finalizar, cancelar, consultar posição e listar a fila atual. Anotado com `@Service` para ser gerenciado pelo Spring.
 - **GeradorDeSenha**: responsável por gerar números de senha sequenciais e únicos.
 - **Exceções de domínio**: `FilaVaziaException` e `AtendimentoNaoEncontradoException`, lançadas em situações específicas do negócio, em vez de erros genéricos.
+
+## API REST
+
+O `FilaController` expõe os seguintes endpoints, mapeando diretamente as operações do `FilaService`:
+
+| Método | Endpoint | Ação |
+|---|---|---|
+| POST | `/fila` | Cliente entra na fila (recebe nome, retorna atendimento com senha) |
+| POST | `/fila/proximo` | Chama o próximo atendimento da fila |
+| PUT | `/fila/{numeroSenha}/finalizar` | Finaliza um atendimento em andamento |
+| DELETE | `/fila/{numeroSenha}` | Cancela um atendimento |
+| GET | `/fila/{numeroSenha}/posicao` | Consulta a posição de um atendimento na fila |
+| GET | `/fila` | Lista todos os atendimentos aguardando na fila |
+
+DTOs de entrada e saída foram usados para não expor as classes de domínio diretamente na API, mantendo o contrato da API independente da estrutura interna do domínio.
 
 ## Decisões técnicas
 
@@ -36,6 +53,8 @@ com.gestaodeatendimento
 - Uso de `Map` para busca rápida de atendimentos em andamento por número de senha.
 - Encapsulamento de transições de estado dentro da própria entidade `Atendimento`, evitando setters genéricos que permitiriam estados inválidos.
 - `equals`/`hashCode` de entidades baseados apenas no identificador único (`id` ou `numeroSenha`), já que representam identidade, não valor.
+- Separação entre DTOs de entrada (mutáveis, com construtor vazio, pensados para o Jackson desserializar JSON) e DTOs de saída (imutáveis, montados pelo próprio código a partir do domínio).
+- Injeção de dependência via construtor no `FilaController`, em vez de instanciar o `FilaService` manualmente.
 
 ## Testes do domínio (Java puro)
 
@@ -51,15 +70,15 @@ Todos os cenários testados retornaram o comportamento esperado, sem erros em te
 
 ## Tecnologias
 
-- Java
-- Spring Boot
+- Java 17
+- Spring Boot 4.1.1
 - Maven
 
 ## Próximos passos
 
-- [ ] Camada de API REST (controllers e DTOs)
-- [ ] Tratamento de erros HTTP para as exceções de domínio
-- [ ] Persistência com JPA e banco de dados
+- [ ] Testar os endpoints REST via Postman
+- [ ] Tratamento de erros HTTP para as exceções de domínio (ex: 404 para atendimento não encontrado, 400 para fila vazia)
+- [ ] Persistência com JPA e banco de dados (MySQL)
 - [ ] Testes automatizados (JUnit)
 - [ ] Autenticação/autorização
 
@@ -73,4 +92,6 @@ Uma ideia em estudo para uma versão futura, bem mais adiante da v1 atual, é ad
 ./mvnw spring-boot:run
 ```
 
-> Observação: a camada de API e a persistência ainda estão em desenvolvimento; por enquanto, a lógica de domínio pode ser validada isoladamente via testes manuais em Java puro.
+A aplicação sobe na porta `8080` por padrão.
+
+> Observação: a persistência ainda não foi implementada; os dados existem apenas em memória durante a execução da aplicação.
