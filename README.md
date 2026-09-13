@@ -4,7 +4,7 @@ API para gerenciamento de filas de atendimento, desenvolvida em Java com Spring 
 
 ## Status do projeto
 
-**v1 — em desenvolvimento.** A camada de domínio (Java puro) está completa e validada por testes manuais. A camada de API (REST) já está implementada e a aplicação sobe com sucesso. Os endpoints ainda serão testados via Postman. Persistência ainda não implementada.
+**v1 — funcional.** A camada de domínio (Java puro) está completa e validada por testes manuais. A camada de API REST está implementada e testada de ponta a ponta via Postman. Persistência ainda não implementada (dados em memória).
 
 ## Sobre o projeto
 
@@ -47,6 +47,8 @@ O `FilaController` expõe os seguintes endpoints, mapeando diretamente as opera�
 
 DTOs de entrada e saída foram usados para não expor as classes de domínio diretamente na API, mantendo o contrato da API independente da estrutura interna do domínio.
 
+**Testado via Postman:** criação de atendimentos, listagem da fila, chamada do próximo (respeitando FIFO) e finalização de atendimento — todos os fluxos retornaram o comportamento esperado, confirmando a integração completa Postman → Controller → FilaService.
+
 ## Decisões técnicas
 
 - Uso de `Queue` (FIFO) para representar a fila de espera, respeitando a ordem natural de chegada.
@@ -55,6 +57,7 @@ DTOs de entrada e saída foram usados para não expor as classes de domínio dir
 - `equals`/`hashCode` de entidades baseados apenas no identificador único (`id` ou `numeroSenha`), já que representam identidade, não valor.
 - Separação entre DTOs de entrada (mutáveis, com construtor vazio, pensados para o Jackson desserializar JSON) e DTOs de saída (imutáveis, montados pelo próprio código a partir do domínio).
 - Injeção de dependência via construtor no `FilaController`, em vez de instanciar o `FilaService` manualmente.
+- Persistência adiada intencionalmente na v1: os dados vivem em memória enquanto a aplicação roda, permitindo validar toda a lógica de negócio e a API antes de introduzir a complexidade de banco de dados.
 
 ## Testes do domínio (Java puro)
 
@@ -76,9 +79,8 @@ Todos os cenários testados retornaram o comportamento esperado, sem erros em te
 
 ## Próximos passos
 
-- [ ] Testar os endpoints REST via Postman
-- [ ] Tratamento de erros HTTP para as exceções de domínio (ex: 404 para atendimento não encontrado, 400 para fila vazia)
 - [ ] Persistência com JPA e banco de dados (MySQL)
+- [ ] Tratamento de erros HTTP para as exceções de domínio (ex: 404 para atendimento não encontrado, 400 para fila vazia)
 - [ ] Testes automatizados (JUnit)
 - [ ] Autenticação/autorização
 
