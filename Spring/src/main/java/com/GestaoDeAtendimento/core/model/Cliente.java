@@ -1,13 +1,26 @@
 package com.GestaoDeAtendimento.core.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Entity
 public class Cliente {
 
-    private final Long id;
-    private final String nome;
-    private final LocalDateTime horarioChegada;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private  Long id;
+
+    private  String nome;
+    private  LocalDateTime horarioChegada;
+
+    public Cliente(){
+
+    }
 
     public Cliente(Long id, String nome, LocalDateTime horarioChegada) {
         this.id = id;

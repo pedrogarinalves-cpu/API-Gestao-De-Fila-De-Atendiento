@@ -1,16 +1,28 @@
 package com.GestaoDeAtendimento.core.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Entity
 public class Atendimento {
-
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long numeroSenha;
+
+   @ManyToOne
     private Cliente cliente;
+
+   @Enumerated(EnumType.STRING)
     private StatusAtendimento status;
     private LocalDateTime horarioEntrada;
     private LocalDateTime horarioInicioAtendimento;
     private LocalDateTime horarioFim;
+
+    public Atendimento(){
+
+    }
 
     public Atendimento(Long numeroSenha, Cliente cliente) {
         this.numeroSenha = numeroSenha;
