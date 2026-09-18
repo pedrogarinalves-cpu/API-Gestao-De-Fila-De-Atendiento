@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> {
 
-    List<Atendimento> findByStatusOrderByhorarioentradaAsc(StatusAtendimento status);
+    List<Atendimento> findByStatusOrderByHorarioEntradaAsc(StatusAtendimento status);
 }

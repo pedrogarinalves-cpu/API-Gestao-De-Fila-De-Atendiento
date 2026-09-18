@@ -4,6 +4,9 @@ import com.GestaoDeAtendimento.core.exception.AtendimentoNaoEncontradoException;
 import com.GestaoDeAtendimento.core.exception.FilaVaziaException;
 import com.GestaoDeAtendimento.core.model.Atendimento;
 import com.GestaoDeAtendimento.core.model.Cliente;
+import com.GestaoDeAtendimento.core.model.StatusAtendimento;
+import com.GestaoDeAtendimento.core.repository.AtendimentoRepository;
+import com.GestaoDeAtendimento.core.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -11,77 +14,61 @@ import java.util.*;
 
 public class FilaService {
 
-     Queue<Atendimento> fila = new LinkedList<>();
-     private GeradorDeSenha geradorDeSenha;
-     private Map<Long, Atendimento> atendimentoEmAndamento;
+    private AtendimentoRepository atendimentoRepository;
+    private ClienteRepository clienteRepository;
 
-    public FilaService() {
-        this.fila = new LinkedList<>();
-        this.geradorDeSenha =  new GeradorDeSenha();
-        this.atendimentoEmAndamento = new HashMap<>();
+    public FilaService(AtendimentoRepository atendimentoRepository,ClienteRepository clienteRepository) {
+        this.atendimentoRepository = atendimentoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
-    public Atendimento entrarNaFila(Cliente cliente){
-        Long numeroSenha = geradorDeSenha.proximaSenha();
+    public Atendimento entrarNaFila(Cliente cliente) {
 
-         Atendimento atendimento = new Atendimento( numeroSenha,  cliente );
+        clienteRepository.save(cliente);
+        Atendimento atendimento = new Atendimento(null, cliente);
+        return atendimentoRepository.save(atendimento);
 
-        fila.add(atendimento);
-        return atendimento;
     }
 
-    public Atendimento chamarProximo(){
-       if (fila.isEmpty()){
-           throw new FilaVaziaException("Não há atendimentos aguardando na fila");
-    }
-        Atendimento atendimento = fila.poll();
+    public Atendimento chamarProximo() {
+        List<Atendimento> aguardando = atendimentoRepository.findByStatusOrderByHorarioEntradaAsc(StatusAtendimento.AGUARDANDO);
+        if (aguardando.isEmpty()) {
+            throw new FilaVaziaException("Não há atendimentos aguardando na fila");
+        }
+        Atendimento atendimento = aguardando.get(0);
         atendimento.iniciarAtendimento();
-        atendimentoEmAndamento.put(atendimento.getNumeroSenha(), atendimento);
-
-        return atendimento;
+        return atendimentoRepository.save(atendimento);
     }
+
     public void finalizarAtendimento(Long numeroSenha) {
-        Atendimento atendimento = atendimentoEmAndamento.get(numeroSenha);
-
-        if (atendimento == null) {
-            throw new AtendimentoNaoEncontradoException("Atendimento com senha " + numeroSenha + " não encontrado");
-        }
-
+        Atendimento atendimento = atendimentoRepository.findById(numeroSenha)
+                .orElseThrow(() -> new AtendimentoNaoEncontradoException("Atendimento com senha " + numeroSenha + " não encontrado"));
         atendimento.finalizar();
-        atendimentoEmAndamento.remove(numeroSenha);
+        atendimentoRepository.save(atendimento);
     }
+
     public void cancelarAtendimento(Long numeroSenha) {
-        Atendimento atendimento = atendimentoEmAndamento.get(numeroSenha);
+        Atendimento atendimento = atendimentoRepository.findById(numeroSenha)
+                .orElseThrow(() -> new AtendimentoNaoEncontradoException("Atendimento com senha " + numeroSenha + " não encontrado"));
 
-        if (atendimento != null) {
-            atendimento.cancelar();
-            atendimentoEmAndamento.remove(numeroSenha);
-            return;
-        }
-
-        for (Atendimento a : fila) {
-            if (a.getNumeroSenha().equals(numeroSenha)) {
-                a.cancelar();
-                fila.remove(a);
-                return;
-            }
-        }
-
-        throw new AtendimentoNaoEncontradoException("Atendimento com senha " + numeroSenha + " não encontrado");
+        atendimento.cancelar();
+        atendimentoRepository.save(atendimento);
     }
+
     public int consultarPosicao(Long numeroSenha) {
-        int posicao = 0;
+        List<Atendimento> aguardando = atendimentoRepository.findByStatusOrderByHorarioEntradaAsc(StatusAtendimento.AGUARDANDO);
 
-        for (Atendimento a : fila) {
-            if (a.getNumeroSenha().equals(numeroSenha)) {
-                return posicao;
+        for (int i = 0; i < aguardando.size(); i++) {
+            if (aguardando.get(i).getNumeroSenha().equals(numeroSenha)) {
+                return i;
             }
-            posicao++;
-        }
 
+
+        }
         throw new AtendimentoNaoEncontradoException("Atendimento com senha " + numeroSenha + " não encontrado");
     }
+
     public List<Atendimento> listarFilaAtual() {
-        return new ArrayList<>(fila);
+        return atendimentoRepository.findByStatusOrderByHorarioEntradaAsc(StatusAtendimento.AGUARDANDO);
     }
 }
