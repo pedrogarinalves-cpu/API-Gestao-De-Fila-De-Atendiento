@@ -4,7 +4,7 @@ API para gerenciamento de filas de atendimento, desenvolvida em Java com Spring 
 
 ## Status do projeto
 
-**v1 — concluída.** Domínio completo, API REST funcional, persistência real com MySQL e tratamento de erros HTTP implementados e testados. A v2 está planejada com testes automatizados, CI/CD e outras melhorias (veja "Próximos passos").
+**v1 concluída** (domínio, API REST, persistência MySQL, tratamento de erros HTTP). **v2 em andamento** na branch `v2-melhorias`: cobertura completa de testes automatizados concluída. CI/CD, Bean Validation e demais melhorias seguem como próximos passos.
 
 ## Sobre o projeto
 
@@ -35,7 +35,7 @@ com.gestaodeatendimento
 
 ## Persistência
 
-Dados armazenados em MySQL via Spring Data JPA/Hibernate. `Cliente` e `Atendimento` são entidades JPA com chave primária autogerada pelo banco (`@GeneratedValue`). A "fila" não é mais uma estrutura em memória: é uma consulta ao banco filtrando atendimentos com `status = AGUARDANDO`, ordenados por horário de entrada (`findByStatusOrderByHorarioEntradaAsc`), preservando o comportamento FIFO. Os dados persistem entre reinicializações da aplicação — validado manualmente reiniciando a aplicação e confirmando que a fila permanece íntegra.
+Dados armazenados em MySQL via Spring Data JPA/Hibernate. `Cliente` e `Atendimento` são entidades JPA com chave primária autogerada pelo banco (`@GeneratedValue`). A "fila" é uma consulta ao banco filtrando atendimentos com `status = AGUARDANDO`, ordenados por horário de entrada (`findByStatusOrderByHorarioEntradaAsc`), preservando o comportamento FIFO. Os dados persistem entre reinicializações da aplicação.
 
 ## API REST
 
@@ -59,7 +59,18 @@ Um `GlobalExceptionHandler` (`@RestControllerAdvice`) intercepta as exceções d
 - `FilaVaziaException` → **400 Bad Request**
 - `AtendimentoNaoEncontradoException` → **404 Not Found**
 
-Ambos os cenários foram testados via Postman e retornam o status e a mensagem corretos.
+## Testes automatizados
+
+A v2 introduziu testes unitários com **JUnit 5 e Mockito**, isolando o `FilaService` de dependências externas (banco de dados) através de repositórios "mockados". Cobertura atual: **10 testes**, contemplando todos os métodos do `FilaService`, tanto os cenários de sucesso quanto os de exceção:
+
+- `entrarNaFila` — cria atendimento com status `AGUARDANDO`
+- `chamarProximo` — sucesso (transição para `EM_ATENDIMENTO`) e exceção quando a fila está vazia
+- `finalizarAtendimento` — sucesso (transição para `FINALIZADO`) e exceção quando a senha não existe
+- `cancelarAtendimento` — sucesso (transição para `CANCELADO`) e exceção quando a senha não existe
+- `consultarPosicao` — retorno correto do índice na fila e exceção quando a senha não existe
+- `listarFilaAtual` — retorno da lista de atendimentos aguardando
+
+Todos os testes rodam isoladamente, sem depender de um banco de dados real.
 
 ## Decisões técnicas
 
@@ -69,6 +80,7 @@ Ambos os cenários foram testados via Postman e retornam o status e a mensagem c
 - Separação entre DTOs de entrada (mutáveis, com construtor vazio, pensados para o Jackson desserializar JSON) e DTOs de saída (imutáveis, montados pelo próprio código a partir do domínio).
 - Injeção de dependência via construtor no `FilaController` e no `FilaService`, em vez de instanciar dependências manualmente.
 - Tratamento de erros centralizado (`@RestControllerAdvice`) em vez de `try/catch` espalhado pelos controllers.
+- Testes unitários com mocks (Mockito) em vez de testes de integração com banco real, priorizando velocidade e isolamento.
 
 ## Testes do domínio (Java puro)
 
@@ -80,17 +92,17 @@ Antes de integrar com Spring, toda a lógica de negócio do `FilaService` foi va
 - Spring Boot 4.1.1
 - Spring Data JPA / Hibernate
 - MySQL
+- JUnit 5 / Mockito
 - Maven
 
 ## Próximos passos (v2)
 
-- [ ] Testes automatizados (JUnit)
+- [x] Testes automatizados (JUnit/Mockito) — concluído, cobertura completa do FilaService
 - [ ] CI com GitHub Actions, rodando os testes a cada push
 - [ ] Bean Validation nos DTOs de entrada
 - [ ] Uso mais completo do Lombok (reduzir boilerplate em entidades e DTOs)
 - [ ] Documentação da API com Swagger/OpenAPI
 - [ ] Containerização com Docker
-- [ ] Autenticação/autorização
 
 ## Visão futura (fora do escopo da v1 e v2)
 
@@ -103,3 +115,9 @@ Uma ideia em estudo para uma versão futura, bem mais adiante, é adaptar o conc
 ```
 
 A aplicação sobe na porta `8080` por padrão. Requer um banco MySQL configurado em `application.properties`.
+
+Para rodar os testes automatizados:
+
+```bash
+./mvnw test
+```
