@@ -1,5 +1,7 @@
 # API Gestão de Fila de Atendimento
 
+![CI](https://github.com/pedrogarinalves-cpu/API-Gestao-De-Fila-De-Atendiento/actions/workflows/ci.yml/badge.svg)
+
 API para gerenciamento de filas de atendimento, desenvolvida em Java com Spring Boot. O projeto começou pela modelagem do domínio em Java puro, antes da camada de aplicação, garantindo que a lógica de negócio fosse sólida, coesa e testável de forma isolada.
 
 ## Status do projeto
