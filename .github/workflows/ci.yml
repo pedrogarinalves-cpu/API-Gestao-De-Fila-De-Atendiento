@@ -22,4 +22,10 @@ jobs:
 
       - name: Rodar testes com Maven
         run: ./mvnw test
+          - name: Dar permissão de execução ao mvnw
+              working-directory: ./Spring
+              run: chmod +x mvnw
+                - name: Rodar testes com Maven
+                  working-directory: ./Spring
+                  run: ./mvnw test
 
