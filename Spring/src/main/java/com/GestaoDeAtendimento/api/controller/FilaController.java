@@ -6,6 +6,7 @@ import com.GestaoDeAtendimento.api.dto.PosicaoResponse;
 import com.GestaoDeAtendimento.core.model.Atendimento;
 import com.GestaoDeAtendimento.core.model.Cliente;
 import com.GestaoDeAtendimento.core.service.FilaService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class FilaController {
     }
 
     @PostMapping
-    public AtendimentoResponse entrarNaFila (@RequestBody EntrarNaFilaRequest request){
+    public AtendimentoResponse entrarNaFila (@Valid @RequestBody EntrarNaFilaRequest request){
         Cliente cliente = new Cliente(null, request.getNome(), LocalDateTime.now());
         Atendimento atendimento = filaService.entrarNaFila(cliente);
         return converterParaResponse(atendimento);
