@@ -1,14 +1,21 @@
 package com.GestaoDeAtendimento.core.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Atendimento {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   @EqualsAndHashCode.Include
     private Long numeroSenha;
 
    @ManyToOne
@@ -20,9 +27,6 @@ public class Atendimento {
     private LocalDateTime horarioInicioAtendimento;
     private LocalDateTime horarioFim;
 
-    public Atendimento(){
-
-    }
 
     public Atendimento(Long numeroSenha, Cliente cliente) {
         this.numeroSenha = numeroSenha;
@@ -31,29 +35,6 @@ public class Atendimento {
         horarioEntrada = LocalDateTime.now();
     }
 
-    public Long getNumeroSenha() {
-        return numeroSenha;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public StatusAtendimento getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getHorarioEntrada() {
-        return horarioEntrada;
-    }
-
-    public LocalDateTime getHorarioInicioAtendimento() {
-        return horarioInicioAtendimento;
-    }
-
-    public LocalDateTime getHorarioFim() {
-        return horarioFim;
-    }
 
     public void iniciarAtendimento(){
         this.status = StatusAtendimento.EM_ATENDIMENTO;
@@ -71,29 +52,6 @@ public class Atendimento {
         this.horarioFim = LocalDateTime.now();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Atendimento that = (Atendimento) o;
-        return Objects.equals(numeroSenha, that.numeroSenha);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(numeroSenha);
-    }
-
-    @Override
-    public String toString() {
-        return "Atendimento{" +
-                "horarioFim=" + horarioFim +
-                ", horarioInicioAtendimento=" + horarioInicioAtendimento +
-                ", horarioEntrada=" + horarioEntrada +
-                ", status=" + status +
-                ", cliente=" + cliente +
-                ", numeroSenha=" + numeroSenha +
-                '}';
-    }
 }
 
 

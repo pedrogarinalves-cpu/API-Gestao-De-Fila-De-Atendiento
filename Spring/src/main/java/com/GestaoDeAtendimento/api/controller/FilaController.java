@@ -6,6 +6,7 @@ import com.GestaoDeAtendimento.api.dto.PosicaoResponse;
 import com.GestaoDeAtendimento.core.model.Atendimento;
 import com.GestaoDeAtendimento.core.model.Cliente;
 import com.GestaoDeAtendimento.core.service.FilaService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class FilaController {
     }
 
     @PostMapping
+    @Operation(summary = "Cliente entra na fila", description = "Cria um novo atendimento com status AGUARDANDO")
     public AtendimentoResponse entrarNaFila (@Valid @RequestBody EntrarNaFilaRequest request){
         Cliente cliente = new Cliente(null, request.getNome(), LocalDateTime.now());
         Atendimento atendimento = filaService.entrarNaFila(cliente);
