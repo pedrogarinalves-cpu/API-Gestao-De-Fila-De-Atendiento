@@ -15,4 +15,19 @@ public class AtendimentoResponse {
     private String status;
     private LocalDateTime horarioEntrada;
 
+    public Long getNumeroSenha() {
+        return numeroSenha;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getHorarioEntrada() {
+        return horarioEntrada;
+    }
 }
